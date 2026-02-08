@@ -41,9 +41,28 @@ function createTextureBlock(title, texture) {
     heading.textContent = title;
     block.appendChild(heading);
     
+    // URL
+    const urlLabel = document.createElement("p");
+    urlLabel.innerHTML = "<strong>URL:</strong>";
+    block.appendChild(urlLabel);
+    
+    const urlInput = document.createElement("input");
+    urlInput.type = "text";
+    urlInput.value = texture.url;
+    urlInput.readOnly = true;
+    urlInput.style.width = "100%";
+    urlInput.style.marginBottom = "10px";
+    block.appendChild(urlInput);
+    
+    const urlCopyBtn = document.createElement("button");
+    urlCopyBtn.className = "copy-btn";
+    urlCopyBtn.textContent = "Copy URL";
+    urlCopyBtn.onclick = () => copyToClipboard(texture.url, urlCopyBtn);
+    block.appendChild(urlCopyBtn);
+    
     // Value
     const valueLabel = document.createElement("p");
-    valueLabel.innerHTML = "<strong>Value:</strong>";
+    valueLabel.innerHTML = "<strong style='margin-top: 15px; display: block;'>Value:</strong>";
     block.appendChild(valueLabel);
     
     const valueInput = document.createElement("input");
@@ -93,3 +112,4 @@ function copyToClipboard(text, button) {
         }, 2000);
     });
 }
+
