@@ -10,6 +10,12 @@ async function upload() {
         body: form
     });
 
+    if (!res.ok) {
+        const text = await res.text(); // для дебага
+        console.error(text);
+        return alert("Upload failed");
+    }
+
     const json = await res.json();
     document.getElementById("out").textContent =
         JSON.stringify(json, null, 2);
