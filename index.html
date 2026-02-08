@@ -3,16 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title>Skin uploader</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        input, button { margin: 5px; padding: 8px; }
+        .result { margin-top: 20px; }
+        .texture-block { 
+            margin: 10px 0; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px;
+        }
+        .copy-btn {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        .copy-btn:hover { background-color: #45a049; }
+        .copied { color: green; font-weight: bold; }
+    </style>
 </head>
 <body>
-
-<input type="file" id="skin" accept="image/png">
-<input type="file" id="cape" accept="image/png">
-<button onclick="upload()">Upload</button>
-<pre id="out"></pre>
-<script src="upload.js"></script>
-
+    <input type="file" id="skin" accept="image/png">
+    <input type="file" id="cape" accept="image/png">
+    <button onclick="upload()">Upload</button>
+    <div id="out"></div>
+    <script src="upload.js"></script>
 </body>
 </html>
-
-
