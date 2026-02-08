@@ -20,7 +20,8 @@ export async function onRequestPost({ request }) {
         const json = await res.json();
         result.skin = {
             value: json.data.texture.value,
-            signature: json.data.texture.signature
+            signature: json.data.texture.signature,
+            url: json.data.texture.url
         };
     }
     
@@ -35,7 +36,8 @@ export async function onRequestPost({ request }) {
         const json = await res.json();
         result.cape = {
             value: json.data.texture.value,
-            signature: json.data.texture.signature
+            signature: json.data.texture.signature,
+            url: json.data.texture.url
         };
     }
     
