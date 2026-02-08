@@ -1,88 +1,140 @@
-export async function onRequestPost({ request }) {
-    try {
-        const form = await request.formData();
-        const skinFile = form.get("skin");
-        const capeFile = form.get("cape");
-        
-        if (!skinFile && !capeFile) {
-            return new Response("No files provided", { status: 400 });
-        }
-        
-        const result = {};
-        
-        if (skinFile) {
-            try {
-                const skinResult = await uploadWithRetry(skinFile);
-                result.skin = skinResult;
-            } catch (e) {
-                return new Response(`Skin upload error: ${e.message}`, { status: 400 });
-            }
-        }
-        
-        // Задержка между запросами
-        if (skinFile && capeFile) {
-            await sleep(2000);
-        }
-        
-        if (capeFile) {
-            try {
-                const capeResult = await uploadWithRetry(capeFile);
-                result.cape = capeResult;
-            } catch (e) {
-                return new Response(`Cape upload error: ${e.message}`, { status: 400 });
-            }
-        }
-        
-        return new Response(JSON.stringify(result), {
-            headers: { "Content-Type": "application/json" }
-        });
-    } catch (e) {
-        return new Response(`Server error: ${e.message}`, { status: 500 });
+async function upload() {
+    const skinFile = document.getElementById("skin").files[0];
+    const capeFile = document.getElementById("cape").files[0];
+    
+    if (!skinFile && !capeFile) return alert("Выбери PNG скин или плащ");
+    
+    const outDiv = document.getElementById("out");
+    outDiv.innerHTML = '<div class="loading">⏳ Загрузка...</div>';
+    
+    const form = new FormData();
+    if (skinFile) form.append("skin", skinFile);
+    if (capeFile) form.append("cape", capeFile);
+    
+    const res = await fetch("/api/upload", {
+        method: "POST",
+        body: form
+    });
+    
+    if (!res.ok) {
+        const text = await res.text();
+        console.error(text);
+        outDiv.innerHTML = '';
+        return alert("Ошибка загрузки");
+    }
+    
+    const json = await res.json();
+    displayResults(json);
+}
+
+function displayResults(data) {
+    const outDiv = document.getElementById("out");
+    outDiv.innerHTML = "";
+    
+    if (data.skin) {
+        outDiv.appendChild(createTextureBlock("Скин", data.skin));
+    }
+    if (data.cape) {
+        outDiv.appendChild(createTextureBlock("Плащ", data.cape));
     }
 }
 
-async function uploadWithRetry(file, retries = 3) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            const mineForm = new FormData();
-            mineForm.append("file", file);
-            
-            const res = await fetch("https://api.mineskin.org/generate/upload", {
-                method: "POST",
-                headers: { "User-Agent": "SkinUploader" },
-                body: mineForm
-            });
-            
-            if (res.status === 429) {
-                // Экспоненциальная задержка: 3сек, 6сек, 12сек
-                const delay = 3000 * Math.pow(2, i);
-                console.log(`Rate limited, waiting ${delay}ms before retry ${i + 1}/${retries}`);
-                await sleep(delay);
-                continue;
-            }
-            
-            if (!res.ok) {
-                throw new Error(`API returned status ${res.status}`);
-            }
-            
-            const json = await res.json();
-            
-            if (!json.data || !json.data.texture) {
-                throw new Error("Invalid API response structure");
-            }
-            
-            return {
-                value: json.data.texture.value,
-                signature: json.data.texture.signature,
-                url: json.data.texture.url || "N/A"
-            };
-        } catch (e) {
-            if (i === retries - 1) throw e;
-            await sleep(1000);
-        }
-    }
+function createTextureBlock(title, texture) {
+    const block = document.createElement("div");
+    block.className = "texture-block";
+    
+    const heading = document.createElement("h3");
+    heading.textContent = title;
+    block.appendChild(heading);
+    
+    // URL секция
+    const urlSection = document.createElement("div");
+    urlSection.className = "url-section";
+    
+    const urlLabel = document.createElement("label");
+    urlLabel.textContent = "URL текстуры:";
+    urlSection.appendChild(urlLabel);
+    
+    const urlWrapper = document.createElement("div");
+    urlWrapper.className = "url-input-wrapper";
+    
+    const urlInput = document.createElement("input");
+    urlInput.type = "text";
+    urlInput.value = texture.url;
+    urlInput.readOnly = true;
+    
+    const urlCopyBtn = document.createElement("button");
+    urlCopyBtn.textContent = "Копировать";
+    urlCopyBtn.onclick = () => copyToClipboard(texture.url, urlCopyBtn);
+    
+    urlWrapper.appendChild(urlInput);
+    urlWrapper.appendChild(urlCopyBtn);
+    urlSection.appendChild(urlWrapper);
+    block.appendChild(urlSection);
+    
+    // Dropdown секция с деталями
+    const detailsSection = document.createElement("div");
+    detailsSection.className = "details-section";
+    
+    const detailsHeader = document.createElement("div");
+    detailsHeader.className = "details-header";
+    detailsHeader.innerHTML = `Подробности <span class="arrow">▼</span>`;
+    
+    const detailsContent = document.createElement("div");
+    detailsContent.className = "details-content";
+    
+    // Value
+    const valueItem = createDetailItem("Value", texture.value);
+    detailsContent.appendChild(valueItem);
+    
+    // Signature
+    const sigItem = createDetailItem("Signature", texture.signature);
+    detailsContent.appendChild(sigItem);
+    
+    detailsHeader.onclick = () => {
+        detailsContent.classList.toggle("open");
+        detailsHeader.querySelector(".arrow").classList.toggle("open");
+    };
+    
+    detailsSection.appendChild(detailsHeader);
+    detailsSection.appendChild(detailsContent);
+    block.appendChild(detailsSection);
+    
+    return block;
 }
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function createDetailItem(label, value) {
+    const item = document.createElement("div");
+    item.className = "detail-item";
+    
+    const labelEl = document.createElement("label");
+    labelEl.textContent = label + ":";
+    item.appendChild(labelEl);
+    
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = value;
+    input.readOnly = true;
+    item.appendChild(input);
+    
+    const copyBtn = document.createElement("button");
+    copyBtn.className = "detail-copy-btn";
+    copyBtn.textContent = "Копировать";
+    copyBtn.onclick = () => copyToClipboard(value, copyBtn);
+    item.appendChild(copyBtn);
+    
+    return item;
+}
+
+function copyToClipboard(text, button) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalText = button.textContent;
+        button.textContent = "✓ Скопировано!";
+        button.style.backgroundColor = "#45a049";
+        
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.backgroundColor = "";
+        }, 2000);
+    });
 }
