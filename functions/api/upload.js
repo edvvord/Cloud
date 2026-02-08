@@ -12,59 +12,22 @@ export async function onRequestPost({ request }) {
         
         if (skinFile) {
             try {
-                const mineForm = new FormData();
-                mineForm.append("file", skinFile);
-                const res = await fetch("https://api.mineskin.org/generate/upload", {
-                    method: "POST",
-                    headers: { "User-Agent": "SkinUploader" },
-                    body: mineForm
-                });
-                
-                if (!res.ok) {
-                    return new Response(`MineSkin API error: ${res.status}`, { status: 400 });
-                }
-                
-                const json = await res.json();
-                
-                if (!json.data || !json.data.texture) {
-                    return new Response("Invalid MineSkin response", { status: 400 });
-                }
-                
-                result.skin = {
-                    value: json.data.texture.value,
-                    signature: json.data.texture.signature,
-                    url: json.data.texture.url || "N/A"
-                };
+                const skinResult = await uploadWithRetry(skinFile);
+                result.skin = skinResult;
             } catch (e) {
                 return new Response(`Skin upload error: ${e.message}`, { status: 400 });
             }
         }
         
+        // Задержка между запросами
+        if (skinFile && capeFile) {
+            await sleep(2000);
+        }
+        
         if (capeFile) {
             try {
-                const mineForm = new FormData();
-                mineForm.append("file", capeFile);
-                const res = await fetch("https://api.mineskin.org/generate/upload", {
-                    method: "POST",
-                    headers: { "User-Agent": "SkinUploader" },
-                    body: mineForm
-                });
-                
-                if (!res.ok) {
-                    return new Response(`MineSkin API error: ${res.status}`, { status: 400 });
-                }
-                
-                const json = await res.json();
-                
-                if (!json.data || !json.data.texture) {
-                    return new Response("Invalid MineSkin response", { status: 400 });
-                }
-                
-                result.cape = {
-                    value: json.data.texture.value,
-                    signature: json.data.texture.signature,
-                    url: json.data.texture.url || "N/A"
-                };
+                const capeResult = await uploadWithRetry(capeFile);
+                result.cape = capeResult;
             } catch (e) {
                 return new Response(`Cape upload error: ${e.message}`, { status: 400 });
             }
@@ -76,4 +39,50 @@ export async function onRequestPost({ request }) {
     } catch (e) {
         return new Response(`Server error: ${e.message}`, { status: 500 });
     }
+}
+
+async function uploadWithRetry(file, retries = 3) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const mineForm = new FormData();
+            mineForm.append("file", file);
+            
+            const res = await fetch("https://api.mineskin.org/generate/upload", {
+                method: "POST",
+                headers: { "User-Agent": "SkinUploader" },
+                body: mineForm
+            });
+            
+            if (res.status === 429) {
+                // Экспоненциальная задержка: 3сек, 6сек, 12сек
+                const delay = 3000 * Math.pow(2, i);
+                console.log(`Rate limited, waiting ${delay}ms before retry ${i + 1}/${retries}`);
+                await sleep(delay);
+                continue;
+            }
+            
+            if (!res.ok) {
+                throw new Error(`API returned status ${res.status}`);
+            }
+            
+            const json = await res.json();
+            
+            if (!json.data || !json.data.texture) {
+                throw new Error("Invalid API response structure");
+            }
+            
+            return {
+                value: json.data.texture.value,
+                signature: json.data.texture.signature,
+                url: json.data.texture.url || "N/A"
+            };
+        } catch (e) {
+            if (i === retries - 1) throw e;
+            await sleep(1000);
+        }
+    }
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
