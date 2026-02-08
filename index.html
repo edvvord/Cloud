@@ -4,33 +4,250 @@
     <meta charset="UTF-8">
     <title>Skin uploader</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        input, button { margin: 5px; padding: 8px; }
-        .result { margin-top: 20px; }
-        .texture-block { 
-            margin: 10px 0; 
-            padding: 10px; 
-            border: 1px solid #ccc; 
-            border-radius: 5px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .copy-btn {
-            background-color: #4CAF50;
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .upload-section {
+            margin-bottom: 30px;
+        }
+
+        .file-group {
+            margin-bottom: 20px;
+        }
+
+        .file-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .file-group input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .file-group input[type="file"]:hover {
+            border-color: #667eea;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background-color: #667eea;
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
+            padding: 12px 40px;
+            border-radius: 5px;
             cursor: pointer;
-            margin-left: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
-        .copy-btn:hover { background-color: #45a049; }
-        .copied { color: green; font-weight: bold; }
+
+        button:hover {
+            background-color: #764ba2;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        #out {
+            margin-top: 20px;
+        }
+
+        .texture-block {
+            margin: 15px 0;
+            padding: 20px;
+            border: 2px solid #667eea;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        .texture-block h3 {
+            margin-bottom: 15px;
+            color: #667eea;
+            text-align: center;
+        }
+
+        .url-section {
+            margin-bottom: 15px;
+        }
+
+        .url-section label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .url-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .url-input-wrapper input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            word-break: break-all;
+        }
+
+        .url-input-wrapper button {
+            padding: 10px 15px;
+            white-space: nowrap;
+            background-color: #4CAF50;
+        }
+
+        .url-input-wrapper button:hover {
+            background-color: #45a049;
+        }
+
+        .url-input-wrapper button.copied {
+            background-color: #4CAF50;
+        }
+
+        .details-section {
+            margin-top: 15px;
+        }
+
+        .details-header {
+            cursor: pointer;
+            padding: 10px;
+            background-color: #e8e8e8;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #333;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .details-header:hover {
+            background-color: #ddd;
+        }
+
+        .details-content {
+            display: none;
+            padding: 15px 10px;
+            border-left: 2px solid #667eea;
+            margin-top: 10px;
+        }
+
+        .details-content.open {
+            display: block;
+        }
+
+        .detail-item {
+            margin-bottom: 15px;
+        }
+
+        .detail-item label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .detail-item input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .detail-copy-btn {
+            margin-top: 5px;
+            padding: 6px 12px;
+            font-size: 12px;
+            background-color: #4CAF50;
+        }
+
+        .detail-copy-btn:hover {
+            background-color: #45a049;
+        }
+
+        .arrow {
+            transition: transform 0.3s;
+        }
+
+        .arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .loading {
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <input type="file" id="skin" accept="image/png">
-    <input type="file" id="cape" accept="image/png">
-    <button onclick="upload()">Upload</button>
-    <div id="out"></div>
+    <div class="container">
+        <h1>🎮 Minecraft Skin Uploader</h1>
+        
+        <div class="upload-section">
+            <div class="file-group">
+                <label for="skin">Загрузить скин:</label>
+                <input type="file" id="skin" accept="image/png">
+            </div>
+
+            <div class="file-group">
+                <label for="cape">Загрузить плащ:</label>
+                <input type="file" id="cape" accept="image/png">
+            </div>
+
+            <div class="button-container">
+                <button onclick="upload()">Загрузить</button>
+            </div>
+        </div>
+
+        <div id="out"></div>
+    </div>
+
     <script src="upload.js"></script>
 </body>
 </html>
