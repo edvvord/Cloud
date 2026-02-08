@@ -3,7 +3,7 @@ export async function onRequestPost({ request }) {
   const file = form.get("skin");
 
   if (!file) {
-    return new Response("No file", { status: 400 });
+    return new Response(JSON.stringify({ error: "No file" }), { status: 400 });
   }
 
   const mineForm = new FormData();
@@ -13,17 +13,17 @@ export async function onRequestPost({ request }) {
     "https://api.mineskin.org/generate/upload",
     {
       method: "POST",
-      headers: {
-        "User-Agent": "SkinUploader"
-      },
+      headers: { "User-Agent": "SkinUploader" },
       body: mineForm
     }
   );
 
   const json = await res.json();
 
-  return Response.json({
+  return new Response(JSON.stringify({
     value: json.data.texture.value,
     signature: json.data.texture.signature
+  }), {
+    headers: { "Content-Type": "application/json" }
   });
 }
