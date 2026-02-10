@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,8 +15,9 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
+      min-height: 90vh;
       padding: 20px;
+      flex-direction: column;
     }
 
     .window {
@@ -28,6 +30,7 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      margin: 20px;
     }
 
     /* Header */
@@ -40,6 +43,7 @@
       font-weight: 600;
       font-size: 16px;
     }
+
     .titlebar::before {
       content: "● ● ●";
       color: #000;
@@ -78,9 +82,11 @@
       border-bottom: 1px solid #111;
       transition: background 0.1s;
     }
+
     .option:hover {
       background: #eae7dc;
     }
+
     .option.active {
       background: #ddd9c3;
       font-weight: 600;
@@ -156,6 +162,40 @@
       transform: translate(1px, 1px);
       box-shadow: -2px -2px 0 #111;
     }
+
+    .voice_chat {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px;
+      /* увеличиваем высоту блока */
+      gap: 15px;
+    }
+
+    .icon-btn {
+      width: 60px;
+      /* квадратная кнопка */
+      height: 60px;
+      border: 2px solid #111;
+      border-radius: 12px;
+      background: #f4f1e6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .icon-btn:hover {
+      background: #eae7dc;
+    }
+
+    .icon {
+      width: 28px;
+      height: 28px;
+      stroke: #111;
+    }
+
 
     /* Results */
     .result-block {
@@ -247,6 +287,7 @@
     #upload-form::-webkit-scrollbar {
       width: 8px;
     }
+
     #options::-webkit-scrollbar-thumb,
     #upload-form::-webkit-scrollbar-thumb {
       background-color: #111;
@@ -257,6 +298,7 @@
         flex-direction: column;
         height: auto;
       }
+
       #options {
         width: 100%;
         height: 120px;
@@ -265,9 +307,11 @@
         flex-direction: row;
         overflow-x: auto;
       }
+
       .section-title {
         display: none;
       }
+
       .option {
         flex: 1;
         border-right: 1px solid #111;
@@ -276,210 +320,273 @@
     }
   </style>
 </head>
+
 <body>
-<div class="window">
-  <div class="titlebar">Minecraft Skin Uploader</div>
-  <div class="main">
-    <div id="options">
-      <div class="section-title">Options</div>
-      <div class="option active" onclick="selectOption('upload')">Upload</div>
-      <div class="option" onclick="selectOption('about')">About</div>
+  <div id="login-container"
+    style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: #9ed88f;">
+    <h2>Вход / Регистрация</h2>
+
+    <input id="nickInput" type="text" placeholder="Введите ник"
+      style="padding: 8px; font-size: 14px; margin-bottom: 10px;">
+
+    <input id="passwordInput" type="password" placeholder="Введите пароль"
+      style="padding: 8px; font-size: 14px; margin-bottom: 10px;">
+
+    <div style="display: flex; gap: 10px;">
+      <button id="loginBtn" class="btn">Войти</button>
+      <button id="registerBtn" class="btn">Регистрация</button>
     </div>
-    <div id="content">
-      <div id="header">Upload Skin</div>
-      <div id="upload-form">
-        <div class="form-group">
-          <label class="form-label">Select Skin (PNG):</label>
-          <input type="file" id="skin" accept="image/png" class="form-input">
-        </div>
 
-        <div class="form-group">
-          <label class="form-label">Select Cape (PNG):</label>
-          <input type="file" id="cape" accept="image/png" class="form-input">
-        </div>
+    <div id="loginMessage" style="margin-top: 10px; color: red;"></div>
+  </div>
 
-        <div class="button-group">
-          <button class="btn" onclick="upload()">Upload</button>
-          <button class="btn" onclick="clearFiles()">Clear</button>
-        </div>
 
-        <div id="result-container"></div>
+  <div id="main-site" style="display:none;">
+
+
+    <div class="window">
+      <div class="titlebar">Minecraft Skin Uploader</div>
+      <div class="main">
+        <div id="options">
+          <div class="section-title">Options</div>
+          <div class="option active" onclick="selectOption('upload')">Upload</div>
+          <div class="option" onclick="selectOption('about')">About</div>
+          <div class="option" onclick="logout()">Logout</div>
+        </div>
+        <div id="content">
+          <div id="header">Upload Skin</div>
+          <div id="upload-form">
+            <div class="form-group">
+              <label class="form-label">Select Skin (PNG):</label>
+              <input type="file" id="skin" accept="image/png" class="form-input">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Select Cape (PNG):</label>
+              <input type="file" id="cape" accept="image/png" class="form-input">
+            </div>
+
+            <div class="button-group">
+              <button class="btn" onclick="upload()">Upload</button>
+              <button class="btn" onclick="clearFiles()">Clear</button>
+            </div>
+
+            <div id="result-container"></div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <div class="window">
+      <div class="main">
+        <div id="content">
+          <div class="voice_chat">
+            <button id="micBtn" class="icon-btn">
+              <!-- микрофон включен -->
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 1v11m0 0a4 4 0 0 0 4-4V1a4 4 0 0 0-8 0v7a4 4 0 0 0 4 4zm0 0v4m-4 4h8" />
+              </svg>
+            </button>
+
+            <button id="speakerBtn" class="icon-btn">
+              <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M11 5L6 9H2v6h4l5 4V5zM19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a6 6 0 0 1 0 7.07" />
+              </svg>
+            </button>
+
+            <button id="join" class="icon-btn">
+              Join
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
-</div>
 
-<script>
-  function selectOption(option) {
-    const options = document.querySelectorAll('.option');
-    options.forEach(o => o.classList.remove('active'));
-    event.target.classList.add('active');
-    
-    if (option === 'about') {
-      document.getElementById('header').textContent = 'About';
-      document.getElementById('upload-form').innerHTML = '<div style="padding: 16px;"><p>Minecraft Skin Uploader v1.0</p><p>Upload your custom skins and capes to get texture data.</p></div>';
-    } else {
-      document.getElementById('header').textContent = 'Upload Skin';
-      location.reload();
-    }
-  }
 
-  async function upload() {
-    const skinFile = document.getElementById("skin").files[0];
-    const capeFile = document.getElementById("cape").files[0];
-    
-    if (!skinFile && !capeFile) {
-      alert("Select PNG skin or cape");
-      return;
+
+  <!-- Minecraft Voice Chat -->
+
+
+  <script>
+    function selectOption(option) {
+      const options = document.querySelectorAll('.option');
+      options.forEach(o => o.classList.remove('active'));
+      event.target.classList.add('active');
+
+      if (option === 'about') {
+        document.getElementById('header').textContent = 'About';
+        document.getElementById('upload-form').innerHTML = '<div style="padding: 16px;"><p>Minecraft Skin Uploader v1.0</p><p>Upload your custom skins and capes to get texture data.</p></div>';
+      } else {
+        document.getElementById('header').textContent = 'Upload Skin';
+        location.reload();
+      }
     }
-    
-    const resultContainer = document.getElementById("result-container");
-    resultContainer.innerHTML = '<div class="loading">Uploading...</div>';
-    
-    const form = new FormData();
-    if (skinFile) form.append("skin", skinFile);
-    if (capeFile) form.append("cape", capeFile);
-    
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: form
-      });
-      
-      if (!res.ok) {
-        const text = await res.text();
-        console.error(text);
-        resultContainer.innerHTML = '<div class="loading">Upload failed</div>';
+
+    async function upload() {
+      const skinFile = document.getElementById("skin").files[0];
+      const capeFile = document.getElementById("cape").files[0];
+
+      if (!skinFile && !capeFile) {
+        alert("Select PNG skin or cape");
         return;
       }
-      
-      const json = await res.json();
-      displayResults(json);
-    } catch (e) {
-      resultContainer.innerHTML = '<div class="loading">Error: ' + e.message + '</div>';
+
+      const resultContainer = document.getElementById("result-container");
+      resultContainer.innerHTML = '<div class="loading">Uploading...</div>';
+
+      const form = new FormData();
+      if (skinFile) form.append("skin", skinFile);
+      if (capeFile) form.append("cape", capeFile);
+
+      try {
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          body: form
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          console.error(text);
+          resultContainer.innerHTML = '<div class="loading">Upload failed</div>';
+          return;
+        }
+
+        const json = await res.json();
+        displayResults(json);
+      } catch (e) {
+        resultContainer.innerHTML = '<div class="loading">Error: ' + e.message + '</div>';
+      }
     }
-  }
 
-  function clearFiles() {
-    document.getElementById("skin").value = "";
-    document.getElementById("cape").value = "";
-    document.getElementById("result-container").innerHTML = "";
-  }
-
-  function displayResults(data) {
-    const resultContainer = document.getElementById("result-container");
-    resultContainer.innerHTML = "";
-    
-    if (data.skin) {
-      resultContainer.appendChild(createResultBlock("Skin", data.skin));
+    function clearFiles() {
+      document.getElementById("skin").value = "";
+      document.getElementById("cape").value = "";
+      document.getElementById("result-container").innerHTML = "";
     }
-    if (data.cape) {
-      resultContainer.appendChild(createResultBlock("Cape", data.cape));
+
+    function displayResults(data) {
+      const resultContainer = document.getElementById("result-container");
+      resultContainer.innerHTML = "";
+
+      if (data.skin) {
+        resultContainer.appendChild(createResultBlock("Skin", data.skin));
+      }
+      if (data.cape) {
+        resultContainer.appendChild(createResultBlock("Cape", data.cape));
+      }
     }
-  }
 
-  function createResultBlock(title, texture) {
-    const block = document.createElement("div");
-    block.className = "result-block";
-    
-    const header = document.createElement("div");
-    header.className = "result-header";
-    const arrow = document.createElement("span");
-    arrow.textContent = "▼";
-    header.appendChild(document.createTextNode(title));
-    header.appendChild(arrow);
-    
-    const content = document.createElement("div");
-    content.className = "result-content open";
-    
-    // URL
-    const urlItem = document.createElement("div");
-    urlItem.className = "result-item";
-    
-    const urlLabel = document.createElement("div");
-    urlLabel.className = "result-label";
-    urlLabel.textContent = "URL:";
-    
-    const urlValue = document.createElement("div");
-    urlValue.className = "result-value";
-    urlValue.textContent = texture.url;
-    
-    const urlCopy = document.createElement("button");
-    urlCopy.className = "result-copy";
-    urlCopy.textContent = "Copy URL";
-    urlCopy.onclick = () => copyToClipboard(texture.url, urlCopy);
-    
-    urlItem.appendChild(urlLabel);
-    urlItem.appendChild(urlValue);
-    urlItem.appendChild(urlCopy);
-    content.appendChild(urlItem);
-    
-    // Value
-    const valueItem = document.createElement("div");
-    valueItem.className = "result-item";
-    
-    const valueLabel = document.createElement("div");
-    valueLabel.className = "result-label";
-    valueLabel.textContent = "Value:";
-    
-    const valueValue = document.createElement("div");
-    valueValue.className = "result-value";
-    valueValue.textContent = texture.value;
-    
-    const valueCopy = document.createElement("button");
-    valueCopy.className = "result-copy";
-    valueCopy.textContent = "Copy Value";
-    valueCopy.onclick = () => copyToClipboard(texture.value, valueCopy);
-    
-    valueItem.appendChild(valueLabel);
-    valueItem.appendChild(valueValue);
-    valueItem.appendChild(valueCopy);
-    content.appendChild(valueItem);
-    
-    // Signature
-    const sigItem = document.createElement("div");
-    sigItem.className = "result-item";
-    
-    const sigLabel = document.createElement("div");
-    sigLabel.className = "result-label";
-    sigLabel.textContent = "Signature:";
-    
-    const sigValue = document.createElement("div");
-    sigValue.className = "result-value";
-    sigValue.textContent = texture.signature;
-    
-    const sigCopy = document.createElement("button");
-    sigCopy.className = "result-copy";
-    sigCopy.textContent = "Copy Signature";
-    sigCopy.onclick = () => copyToClipboard(texture.signature, sigCopy);
-    
-    sigItem.appendChild(sigLabel);
-    sigItem.appendChild(sigValue);
-    sigItem.appendChild(sigCopy);
-    content.appendChild(sigItem);
-    
-    header.onclick = () => {
-      content.classList.toggle("open");
-      arrow.textContent = content.classList.contains("open") ? "▼" : "▶";
-    };
-    
-    block.appendChild(header);
-    block.appendChild(content);
-    return block;
-  }
+    function createResultBlock(title, texture) {
+      const block = document.createElement("div");
+      block.className = "result-block";
 
-  function copyToClipboard(text, button) {
-    navigator.clipboard.writeText(text).then(() => {
-      const originalText = button.textContent;
-      button.textContent = "✓ Copied!";
-      button.style.background = "#c8e6c9";
-      
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.style.background = "";
-      }, 1500);
-    });
-  }
-</script>
+      const header = document.createElement("div");
+      header.className = "result-header";
+      const arrow = document.createElement("span");
+      arrow.textContent = "▼";
+      header.appendChild(document.createTextNode(title));
+      header.appendChild(arrow);
+
+      const content = document.createElement("div");
+      content.className = "result-content open";
+
+      // URL
+      const urlItem = document.createElement("div");
+      urlItem.className = "result-item";
+
+      const urlLabel = document.createElement("div");
+      urlLabel.className = "result-label";
+      urlLabel.textContent = "URL:";
+
+      const urlValue = document.createElement("div");
+      urlValue.className = "result-value";
+      urlValue.textContent = texture.url;
+
+      const urlCopy = document.createElement("button");
+      urlCopy.className = "result-copy";
+      urlCopy.textContent = "Copy URL";
+      urlCopy.onclick = () => copyToClipboard(texture.url, urlCopy);
+
+      urlItem.appendChild(urlLabel);
+      urlItem.appendChild(urlValue);
+      urlItem.appendChild(urlCopy);
+      content.appendChild(urlItem);
+
+      // Value
+      const valueItem = document.createElement("div");
+      valueItem.className = "result-item";
+
+      const valueLabel = document.createElement("div");
+      valueLabel.className = "result-label";
+      valueLabel.textContent = "Value:";
+
+      const valueValue = document.createElement("div");
+      valueValue.className = "result-value";
+      valueValue.textContent = texture.value;
+
+      const valueCopy = document.createElement("button");
+      valueCopy.className = "result-copy";
+      valueCopy.textContent = "Copy Value";
+      valueCopy.onclick = () => copyToClipboard(texture.value, valueCopy);
+
+      valueItem.appendChild(valueLabel);
+      valueItem.appendChild(valueValue);
+      valueItem.appendChild(valueCopy);
+      content.appendChild(valueItem);
+
+      // Signature
+      const sigItem = document.createElement("div");
+      sigItem.className = "result-item";
+
+      const sigLabel = document.createElement("div");
+      sigLabel.className = "result-label";
+      sigLabel.textContent = "Signature:";
+
+      const sigValue = document.createElement("div");
+      sigValue.className = "result-value";
+      sigValue.textContent = texture.signature;
+
+      const sigCopy = document.createElement("button");
+      sigCopy.className = "result-copy";
+      sigCopy.textContent = "Copy Signature";
+      sigCopy.onclick = () => copyToClipboard(texture.signature, sigCopy);
+
+      sigItem.appendChild(sigLabel);
+      sigItem.appendChild(sigValue);
+      sigItem.appendChild(sigCopy);
+      content.appendChild(sigItem);
+
+      header.onclick = () => {
+        content.classList.toggle("open");
+        arrow.textContent = content.classList.contains("open") ? "▼" : "▶";
+      };
+
+      block.appendChild(header);
+      block.appendChild(content);
+      return block;
+    }
+
+    function copyToClipboard(text, button) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = button.textContent;
+        button.textContent = "✓ Copied!";
+        button.style.background = "#c8e6c9";
+
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.style.background = "";
+        }, 1500);
+      });
+    }
+  </script>
+  <script src="voice.js"></script>
+  <script src="account.js"></script>
 </body>
+
 </html>
